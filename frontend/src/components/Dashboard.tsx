@@ -71,7 +71,7 @@ export function Dashboard({ userId, refreshTrigger }: DashboardProps) {
           </div>
           <div className="stat-content">
             <div className="stat-label">Today's Hours</div>
-            <div className="stat-value">{data?.todayHours.toFixed(2)}h</div>
+            <div className="stat-value">{(data?.todayHours ?? 0).toFixed(2)}h</div>
           </div>
         </div>
 
@@ -81,7 +81,7 @@ export function Dashboard({ userId, refreshTrigger }: DashboardProps) {
           </div>
           <div className="stat-content">
             <div className="stat-label">Total Hours</div>
-            <div className="stat-value">{data?.totalHours.toFixed(2)}h</div>
+            <div className="stat-value">{(data?.totalHours ?? 0).toFixed(2)}h</div>
           </div>
         </div>
 

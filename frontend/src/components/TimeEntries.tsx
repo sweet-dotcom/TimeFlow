@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import * as api from '../services/api';
-import { Calendar, Clock, CheckCircle2, PlayCircle } from 'lucide-react';
+import { Calendar, CheckCircle2, PlayCircle } from 'lucide-react';
 import './TimeEntries.css';
 
 interface TimeEntry {

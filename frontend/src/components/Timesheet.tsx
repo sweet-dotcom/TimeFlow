@@ -24,9 +24,9 @@ export function Timesheet({ userId, refreshTrigger }: TimesheetProps) {
   const [timesheet, setTimesheet] = useState<TimesheetData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadTimesheet();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, refreshTrigger]);
 
   const loadTimesheet = async () => {

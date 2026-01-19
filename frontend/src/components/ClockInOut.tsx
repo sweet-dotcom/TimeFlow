@@ -26,16 +26,22 @@ export function ClockInOut({ userId, onEntryCreated }: ClockInOutProps) {
     }).catch(console.error);
   }, []);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadActiveEntry();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
+  useEffect(() => {
+    if (!activeEntry) {
+      setElapsedTime('00:00:00');
+      return;
+    }
+    updateElapsedTime();
     const interval = setInterval(() => {
-      if (activeEntry) {
-        updateElapsedTime();
-      }
+      updateElapsedTime();
     }, 1000);
     return () => clearInterval(interval);
-  }, [userId, activeEntry]);
+  }, [activeEntry]);
 
   const loadActiveEntry = async () => {
     try {
@@ -50,18 +56,21 @@ export function ClockInOut({ userId, onEntryCreated }: ClockInOutProps) {
   };
 
   const updateElapsedTime = () => {
-    if (!activeEntry) return;
-    const start = new Date(activeEntry.clockInTime).getTime();
-    const now = Date.now();
-    const diff = now - start;
-    
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000); // Fixed seconds calc
-    
-    setElapsedTime(
-      `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-    );
+    setActiveEntry((current: any) => {
+      if (!current) return current;
+      const start = new Date(current.clockInTime).getTime();
+      const now = Date.now();
+      const diff = now - start;
+      
+      const hours = Math.floor(diff / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      setElapsedTime(
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+      );
+      return current;
+    });
   };
 
   const handleClockIn = async () => {
@@ -84,16 +93,8 @@ export function ClockInOut({ userId, onEntryCreated }: ClockInOutProps) {
         setNotes('');
         setTags('');
         setIsBillable(true);
-        await loadActiveEntry();
-        // Force refresh immediately
-        setActiveEntry({ 
-           projectId, 
-           clockInTime: Date.now(), 
-           notes, 
-           userId,
-           isBillable,
-           tags: tagList
-        }); 
+        // Use the actual result from API which includes the id
+        setActiveEntry(result);
         onEntryCreated();
       }
     } catch (error: any) {
