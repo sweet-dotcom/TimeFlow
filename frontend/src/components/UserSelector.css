@@ -1,0 +1,73 @@
+.user-selector {
+  display: flex;
+  align-items: center;
+  margin-left: auto; /* Push to right in flex container */
+}
+
+/* Hide redundant info since App.tsx sidebar displays it */
+.user-label, .user-value {
+  display: none;
+}
+
+.edit-button {
+  background: transparent;
+  border: 1px solid #d9d9d9;
+  color: #666;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.edit-button:hover {
+  border-color: #1890ff;
+  color: #1890ff;
+  background: #f0f7ff;
+}
+
+/* Editing State */
+.user-selector.editing {
+  position: absolute;
+  bottom: 70px; /* Pop up above the footer */
+  left: 10px;
+  right: 10px;
+  background: white;
+  padding: 15px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-radius: 6px;
+  z-index: 100;
+  border: 1px solid #f0f0f0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.user-selector.editing input {
+  padding: 8px;
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.user-selector.editing button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.user-selector.editing button:nth-of-type(2) { /* Save button - it's the 2nd element after input */
+  background: #1890ff;
+  color: white;
+}
+
+.user-selector.editing button:last-of-type { /* Cancel button */
+  background: #f5f5f5;
+  color: #666;
+  margin-top: 5px;
+}
