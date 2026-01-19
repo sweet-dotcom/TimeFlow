@@ -8,13 +8,31 @@ const kafka = new Kafka({
 export const producer = kafka.producer();
 export const consumer = kafka.consumer({ groupId: 'timekeeping-group' });
 
+let isKafkaConnected = false;
+
 export async function initializeKafka() {
-  console.log('Kafka initialization skipped - using in-memory mode');
-  // Kafka integration can be enabled later by uncommenting code below
-  // For now, we'll use in-memory storage with console logging
+  try {
+    await producer.connect();
+    isKafkaConnected = true;
+    console.log('✓ Kafka producer connected');
+  } catch (error) {
+    console.log('⚠ Kafka unavailable - running in in-memory mode');
+    console.log('To use Kafka: Start Kafka broker on localhost:9092');
+    isKafkaConnected = false;
+  }
+}
+
+export function isKafkaAvailable() {
+  return isKafkaConnected;
 }
 
 export async function closeKafka() {
-  await producer.disconnect();
-  await consumer.disconnect();
+  try {
+    if (isKafkaConnected) {
+      await producer.disconnect();
+      await consumer.disconnect();
+    }
+  } catch (e) {
+    // Ignore disconnect errors
+  }
 }

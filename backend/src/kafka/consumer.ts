@@ -1,43 +1,39 @@
-import { consumer } from './client';
+import { consumer, isKafkaAvailable } from './client';
 import { TimeEntry, Project } from '../types';
 
 const timeEntries = new Map<string, TimeEntry>();
 const projects = new Map<string, Project>();
 
 export async function startConsumers() {
+  if (!isKafkaAvailable()) {
+    console.log('⚠ Kafka consumers not started - Kafka unavailable');
+    return;
+  }
+
   try {
-    // Set a timeout for consumer connection
-    const consumerPromise = (async () => {
-      await consumer.subscribe({ topic: 'time-entry-events' });
-      await consumer.subscribe({ topic: 'project-events' });
+    await consumer.connect();
+    await consumer.subscribe({ topic: 'time-entry-events', fromBeginning: true });
+    await consumer.subscribe({ topic: 'project-events', fromBeginning: true });
 
-      await consumer.run({
-        eachMessage: async ({ topic, partition, message }) => {
-          try {
-            const data = JSON.parse(message.value?.toString() || '{}');
-
-            if (topic === 'time-entry-events') {
-              handleTimeEntryEvent(data);
-            } else if (topic === 'project-events') {
-              handleProjectEvent(data);
-            }
-          } catch (error) {
-            console.error('Error processing message:', error);
+    await consumer.run({
+      eachMessage: async ({ topic, partition, message }) => {
+        try {
+          const data = JSON.parse(message.value?.toString() || '{}');
+          
+          if (topic === 'time-entry-events') {
+            handleTimeEntryEvent(data);
+          } else if (topic === 'project-events') {
+            handleProjectEvent(data);
           }
-        },
-      });
-    })();
-
-    // Set a 5 second timeout for Kafka connection
-    await Promise.race([
-      consumerPromise,
-      new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Kafka connection timeout')), 5000)
-      ),
-    ]);
+        } catch (error) {
+          console.error('Error processing Kafka message:', error);
+        }
+      },
+    });
+    
+    console.log('✓ Kafka consumers started');
   } catch (error) {
-    console.log('Could not start consumers:', error instanceof Error ? error.message : String(error));
-    // Continue without Kafka consumers - app will work in-memory
+    console.log('⚠ Could not start Kafka consumers:', error instanceof Error ? error.message : String(error));
   }
 }
 

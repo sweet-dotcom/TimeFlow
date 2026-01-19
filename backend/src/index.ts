@@ -55,31 +55,29 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 // Initialize and start server
 async function start() {
   try {
+    console.log('🚀 Starting TimeFlow server...');
+    
     // Try to initialize Kafka, but don't fail if it's not available
     try {
       await initializeKafka();
-      // Start consumers without waiting - they'll run in background
-      // If they fail, they'll just log and continue
-      startConsumers()
-        .then(() => console.log('Consumers started'))
-        .catch(() => console.log('Consumers not started - Kafka may not be available'));
+      // Start consumers in background - don't wait for them
+      startConsumers().catch(() => {
+        console.log('⚠ Kafka consumers failed to start');
+      });
     } catch (kafkaError) {
-      console.log('Kafka initialization skipped - using in-memory mode');
+      console.log('⚠ Kafka initialization failed - app running in in-memory mode');
     }
 
     app.listen(PORT, () => {
       console.log(`✓ Server running on port ${PORT}`);
       console.log(`✓ Health check: http://localhost:${PORT}/health`);
+      console.log(`✓ Open http://localhost:${PORT} in your browser`);
     });
 
     // Graceful shutdown
     process.on('SIGINT', async () => {
       console.log('\nShutting down gracefully...');
-      try {
-        await closeKafka();
-      } catch (e) {
-        // Ignore errors during shutdown
-      }
+      await closeKafka();
       process.exit(0);
     });
   } catch (error) {

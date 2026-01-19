@@ -1,7 +1,11 @@
-import { producer } from './client';
+import { producer, isKafkaAvailable } from './client';
 import { TimeEntryEvent } from '../types';
 
 export async function publishTimeEntryEvent(event: TimeEntryEvent) {
+  if (!isKafkaAvailable()) {
+    return; // Skip if Kafka not available
+  }
+  
   try {
     await producer.send({
       topic: 'time-entry-events',
@@ -13,14 +17,17 @@ export async function publishTimeEntryEvent(event: TimeEntryEvent) {
         },
       ],
     });
-    console.log(`Published ${event.eventType} event for entry ${event.entryId}`);
+    console.log(`✓ Published ${event.eventType} event to Kafka`);
   } catch (error) {
-    console.warn('Warning: Could not publish to Kafka:', error);
-    // Continue without Kafka
+    console.log('⚠ Could not publish to Kafka:', error instanceof Error ? error.message : String(error));
   }
 }
 
 export async function publishProjectEvent(projectId: string, projectName: string) {
+  if (!isKafkaAvailable()) {
+    return; // Skip if Kafka not available
+  }
+  
   try {
     await producer.send({
       topic: 'project-events',
@@ -37,8 +44,8 @@ export async function publishProjectEvent(projectId: string, projectName: string
         },
       ],
     });
+    console.log('✓ Published PROJECT_CREATED event to Kafka');
   } catch (error) {
-    console.warn('Warning: Could not publish project event to Kafka:', error);
-    // Continue without Kafka
+    console.log('⚠ Could not publish project event to Kafka:', error instanceof Error ? error.message : String(error));
   }
 }
