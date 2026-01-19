@@ -79,12 +79,27 @@ docker-compose down
   - Updates in-memory storage for immediate data access.
 
 ### 3. *Kafka (Event Streaming Layer)*
+
 - *Producer:* Backend publishes events (e.g., CLOCK_IN, CLOCK_OUT, PROJECT_CREATED) to Kafka topics.
 - *Consumer:* Backend consumes these events and reconstructs the in-memory state (event sourcing pattern).
 - *Topics:*
   - time-entry-events: All time entry actions.
   - project-events: Project creation events.
-- If Kafka is unavailable, the backend gracefully falls back to in-memory storage only.
+- *Graceful Fallback:* If Kafka is unavailable, the app automatically runs in in-memory mode within 5 seconds - no configuration needed.
+
+#### Running with Kafka (Optional)
+
+To enable Kafka event streaming:
+
+1. Install Java JDK 17+ (e.g., `winget install Microsoft.OpenJDK.17`)
+2. Download and extract Apache Kafka to `C:\kafka`
+3. Start Zookeeper: `bin\windows\zookeeper-server-start.bat config\zookeeper.properties`
+4. Start Kafka: `bin\windows\kafka-server-start.bat config\server.properties`
+5. Create topics:
+   - `bin\windows\kafka-topics.bat --create --topic time-entry-events --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1`
+   - `bin\windows\kafka-topics.bat --create --topic project-events --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1`
+
+Or use Docker: `docker-compose up -d zookeeper kafka`
 
 ### 4. *In-Memory Storage*
 - All time entries and projects are stored in memory using JavaScript Maps.
